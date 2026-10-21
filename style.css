@@ -92,17 +92,18 @@ h2 {
 
 .card-stack {
     position: relative;
-    width: 210px;
-    height: 310px;
+    width: min(220px, 65vw);
+    aspect-ratio: 5 / 7;
+    height: auto;
+    overflow: visible;
     cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
 }
 
 .stacked-card {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100%;
+    height: 100%;
     transform:
         translate(var(--card-x), var(--card-y))
         rotate(var(--card-rotation));
@@ -111,8 +112,6 @@ h2 {
     transition:
         transform 0.2s ease,
         opacity 0.2s ease;
-    cursor: pointer;
-    user-select: none;
 }
 
 .card-stack:hover .stacked-card:first-child {
@@ -122,9 +121,7 @@ h2 {
 }
 
 .stacked-card.card-leaving {
-    transform:
-        translate(100px, -90px)
-        rotate(18deg);
+    transform: translate(100px, -90px) rotate(18deg);
     opacity: 0;
     pointer-events: none;
 }
@@ -132,15 +129,21 @@ h2 {
 /* Single card being revealed */
 
 .current-card {
-    width: 210px;
+    width: min(250px, 70vw);
+    aspect-ratio: 5 / 7;
     cursor: pointer;
     animation: card-reveal 0.3s ease-out;
+}
+
+.current-card .card {
+    width: 100%;
+    height: 100%;
 }
 
 @keyframes card-reveal {
     from {
         opacity: 0;
-        transform: translateY(16px) scale(0.96);
+        transform: translateY(12px) scale(0.96);
     }
 
     to {
@@ -187,17 +190,13 @@ button:focus-visible {
 /* Card grids */
 
 .card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
-    gap: 20px;
-    margin-top: 24px;
-    text-align: center;
+    grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+    align-items: start;
 }
 
 .revealed-grid {
     max-width: 850px;
-    margin-right: auto;
-    margin-left: auto;
+    margin: 24px auto 0;
 }
 
 .collection-grid {
@@ -210,27 +209,37 @@ button:focus-visible {
 /* Individual cards */
 
 .card {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
     min-width: 0;
+    aspect-ratio: 5 / 7;
     padding: 0;
-    overflow: hidden;
-    border: 2px solid var(--border);
+    border: 2px solid var(--rarity-color, #b6a995);
     border-radius: 5px;
     background: transparent;
     box-shadow: none;
+    overflow: visible;
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
 
+/* Artwork fills the 5:7 card exactly */
+
 .card img {
+    position: relative;
+    z-index: 1;
     display: block;
     width: 100%;
-    aspect-ratio: 2 / 3;
-    object-fit: contain;
-    border-radius: 3px;
+    height: 100%;
+    aspect-ratio: 5 / 7;
+    object-fit: cover;
+    border-radius: 2px;
     pointer-events: none;
 }
 
 .card img.image-error {
-    min-height: 150px;
     background: #e6d7bd;
+    object-fit: contain;
 }
 
 /* Revealed card: artwork only, no extra text or padding */
@@ -238,33 +247,51 @@ button:focus-visible {
 .large-card {
     padding: 0;
     border-width: 2px;
+    border-radius: 5px;
     cursor: pointer;
 }
 
 .large-card img {
     width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* Rarity-colored borders */
 
-.rarity-legendary {
-    border-color: #c99a25;
-}
-
-.rarity-epic {
-    border-color: #9862b8;
-}
-
-.rarity-rare {
-    border-color: #5784b8;
+.rarity-common {
+    --rarity-color: #b6a995;
+    box-shadow: none;
 }
 
 .rarity-uncommon {
-    border-color: #64946b;
+    --rarity-color: #64946b;
+    box-shadow:
+        0 0 4px 1px rgb(100 148 107 / 35%);
 }
 
-.rarity-common {
-    border-color: #b6a995;
+.rarity-rare {
+    --rarity-color: #5784b8;
+    box-shadow:
+        0 0 5px 2px rgb(87 132 184 / 40%),
+        0 0 12px 3px rgb(87 132 184 / 22%);
+}
+
+.rarity-epic {
+    --rarity-color: #9862b8;
+    box-shadow:
+        0 0 6px 2px rgb(152 98 184 / 50%),
+        0 0 16px 5px rgb(152 98 184 / 28%),
+        0 0 28px 7px rgb(152 98 184 / 12%);
+}
+
+.rarity-legendary {
+    --rarity-color: #e5ad36;
+    box-shadow:
+        0 0 7px 3px rgb(229 173 54 / 60%),
+        0 0 18px 7px rgb(229 173 54 / 38%),
+        0 0 32px 12px rgb(229 173 54 / 22%),
+        0 0 48px 16px rgb(229 173 54 / 10%);
 }
 
 
@@ -307,8 +334,7 @@ button:focus-visible {
         min-height: 300px;
     }
 
-    .card-stack,
-    .current-card {
+    .card-stack {
         width: 190px;
     }
 
@@ -318,13 +344,18 @@ button:focus-visible {
 
     .card-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
+        gap: 16px;
     }
 
     .collection-grid {
-        padding: 12px;
+        padding: 14px;
+    }
+
+    .current-card {
+        width: min(220px, 70vw);
     }
 }
+
 
 @media (prefers-reduced-motion: reduce) {
     *,
@@ -332,5 +363,12 @@ button:focus-visible {
     *::after {
         animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
+    }
+
+    .card,
+    .stacked-card,
+    .current-card {
+        animation: none !important;
+        transition: none !important;
     }
 }
