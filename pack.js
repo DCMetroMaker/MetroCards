@@ -68,7 +68,8 @@ function drawCard() {
 
 // Create a card element. The card ID is never shown as text.
 function createCardElement(card, extraClass = "") {
-    const wrapper = document.createElement("article");
+    const wrapper = document.createElement("div");
+
     wrapper.className =
         `card rarity-${card.rarity.toLowerCase()} ${extraClass}`.trim();
 
@@ -82,11 +83,8 @@ function createCardElement(card, extraClass = "") {
         image.classList.add("image-error");
     };
 
-    const rarity = document.createElement("p");
-    rarity.className = "card-rarity";
-    rarity.textContent = card.rarity;
+    wrapper.appendChild(image);
 
-    wrapper.append(image, rarity);
     return wrapper;
 }
 
@@ -117,7 +115,7 @@ function startPack() {
     buildCardStack();
 
     cardStack.hidden = false;
-    packButton.textContent = "Reveal Next Card";
+    packButton.textContent = "Open Pack";
     packButton.hidden = false;
     anotherPackButton.hidden = true;
 
@@ -156,6 +154,7 @@ function buildCardStack() {
 }
 
 // Reveal the next card from the stack.
+
 function revealNextCard() {
     if (!packStarted || packComplete || revealedCount >= CARDS_PER_PACK) {
         return;
@@ -168,7 +167,6 @@ function revealNextCard() {
     if (topCard) {
         topCard.classList.add("card-leaving");
 
-        // Let the short exit animation finish before updating the display.
         window.setTimeout(() => {
             topCard.remove();
         }, 180);
@@ -181,7 +179,7 @@ function revealNextCard() {
 
     packInstructions.textContent =
         revealedCount < CARDS_PER_PACK
-            ? "Nice pull! Click the card or button to reveal the next one."
+            ? "Click the card to reveal the next one."
             : "That's your last card!";
 
     packStatus.textContent =
@@ -189,10 +187,9 @@ function revealNextCard() {
 
     if (revealedCount === CARDS_PER_PACK) {
         finishPack();
-    } else {
-        packButton.textContent = "Reveal Next Card";
     }
 }
+
 
 // Show the completed pack and add its cards to the collection.
 function finishPack() {
@@ -255,12 +252,13 @@ cardStack.addEventListener("keydown", (event) => {
 packButton.addEventListener("click", () => {
     if (!packStarted && !packComplete) {
         startPack();
-    } else if (packStarted) {
-        revealNextCard();
     }
 });
 
 anotherPackButton.addEventListener("click", startPack);
+cardStack.addEventListener("click", revealNextCard);
+currentCard.addEventListener("click", revealNextCard);
+
 
 // Initial state.
 packImage.src = "cards/pack.png";
