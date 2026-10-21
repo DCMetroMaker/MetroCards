@@ -1,4 +1,3 @@
-
 /* MetroCards - Main Styles */
 
 :root {
@@ -20,6 +19,10 @@ body {
     background: var(--tan);
     color: var(--text);
     font-family: Arial, Helvetica, sans-serif;
+}
+
+[hidden] {
+    display: none !important;
 }
 
 /* Header */
@@ -47,8 +50,8 @@ body {
 
 .opening-section,
 .collection-section {
-    text-align: center;
     margin-bottom: 48px;
+    text-align: center;
 }
 
 h2 {
@@ -63,14 +66,15 @@ h2 {
     line-height: 1.5;
 }
 
-/* Pack display */
+/* Pack and card display */
 
 .pack-display {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 260px;
-    margin: 20px auto;
+    min-height: 340px;
+    margin: 24px auto 18px;
+    perspective: 1000px;
 }
 
 #pack-image {
@@ -78,11 +82,71 @@ h2 {
     width: min(220px, 70vw);
     max-height: 320px;
     object-fit: contain;
-    border-radius: 8px;
 }
 
 #pack-image[hidden] {
     display: none;
+}
+
+/* Stack of four cards */
+
+.card-stack {
+    position: relative;
+    width: 210px;
+    height: 310px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.stacked-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    transform:
+        translate(var(--card-x), var(--card-y))
+        rotate(var(--card-rotation));
+    transform-origin: center 80%;
+    z-index: var(--stack-index);
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+    cursor: pointer;
+    user-select: none;
+}
+
+.card-stack:hover .stacked-card:first-child {
+    transform:
+        translate(var(--card-x), calc(var(--card-y) - 5px))
+        rotate(var(--card-rotation));
+}
+
+.stacked-card.card-leaving {
+    transform:
+        translate(100px, -90px)
+        rotate(18deg);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Single card being revealed */
+
+.current-card {
+    width: 210px;
+    cursor: pointer;
+    animation: card-reveal 0.3s ease-out;
+}
+
+@keyframes card-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* Buttons */
@@ -109,10 +173,6 @@ button:focus-visible {
     outline-offset: 3px;
 }
 
-button[hidden] {
-    display: none;
-}
-
 .secondary-button {
     margin-top: 24px;
 }
@@ -120,8 +180,8 @@ button[hidden] {
 .pack-status {
     min-height: 22px;
     margin: 16px 0;
-    font-size: 0.95rem;
     color: #6e5847;
+    font-size: 0.95rem;
 }
 
 /* Card grids */
@@ -151,12 +211,12 @@ button[hidden] {
 
 .card {
     min-width: 0;
-    padding: 10px;
+    padding: 9px;
+    overflow: hidden;
     border: 2px solid var(--border);
     border-radius: 7px;
     background: #fff9ed;
-    box-shadow: 0 3px 7px rgb(63 41 30 / 10%);
-    overflow: hidden;
+    box-shadow: 0 3px 7px rgb(63 41 30 / 12%);
 }
 
 .card img {
@@ -165,25 +225,32 @@ button[hidden] {
     aspect-ratio: 2 / 3;
     object-fit: contain;
     border-radius: 4px;
+    pointer-events: none;
 }
 
 .card img.image-error {
     min-height: 150px;
     background: #e6d7bd;
-    object-fit: contain;
-}
-
-.card-name {
-    margin: 10px 0 4px;
-    font-size: 0.95rem;
-    font-weight: bold;
-    overflow-wrap: anywhere;
 }
 
 .card-rarity {
-    margin: 0 0 4px;
+    margin: 10px 0 2px;
     font-size: 0.85rem;
     font-weight: bold;
+}
+
+/* Larger card during reveal */
+
+.large-card {
+    padding: 8px;
+}
+
+.large-card img {
+    width: 100%;
+}
+
+.large-card .card-rarity {
+    font-size: 1rem;
 }
 
 /* Rarity colors */
@@ -252,7 +319,7 @@ button[hidden] {
     font-size: 0.9rem;
 }
 
-/* Mobile layout */
+/* Mobile */
 
 @media (max-width: 500px) {
     .container {
@@ -263,6 +330,19 @@ button[hidden] {
         font-size: 1.7rem;
     }
 
+    .pack-display {
+        min-height: 300px;
+    }
+
+    .card-stack,
+    .current-card {
+        width: 190px;
+    }
+
+    .card-stack {
+        height: 285px;
+    }
+
     .card-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
@@ -271,8 +351,13 @@ button[hidden] {
     .collection-grid {
         padding: 12px;
     }
+}
 
-    .pack-display {
-        min-height: 220px;
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
     }
 }
