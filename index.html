@@ -1,1 +1,83 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#593b2b">
+    <title>MetroCards</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Load the card database before the pack logic -->
+    <script src="cards.js" defer></script>
+    <script src="pack.js" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <h1>MetroCards</h1>
+    </header>
+
+    <main class="container">
+        <section class="opening-section">
+            <h2>Open a Pack</h2>
+            <p class="subtitle" id="pack-instructions">
+                Ready to see what you pull?
+            </p>
+
+            <div class="pack-display" id="pack-display">
+                <img
+                    id="pack-image"
+                    src="pack.png"
+                    alt="MetroCards booster pack"
+                >
+            </div>
+
+            <button id="pack-button" type="button">
+                Open Pack
+            </button>
+
+            <p id="pack-status" class="pack-status" aria-live="polite"></p>
+
+            <div
+                id="revealed-cards"
+                class="card-grid revealed-grid"
+                aria-label="Cards in the current pack"
+            ></div>
+
+            <button
+                id="another-pack-button"
+                class="secondary-button"
+                type="button"
+                hidden
+            >
+                Open Another Pack
+            </button>
+        </section>
+
+        <section class="collection-section">
+            <h2>Your Collection</h2>
+            <p class="subtitle">
+                Cards you have collected will appear here.
+            </p>
+
+            <p id="collection-count" class="collection-count">
+                0 cards collected
+            </p>
+
+            <div
+                id="collection"
+                class="card-grid collection-grid"
+                aria-label="Your card collection"
+            >
+                <p id="empty-collection" class="empty-message">
+                    Your collection is empty. Open a pack to get started!
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        MetroCards
+    </footer>
+</body>
+</html>
