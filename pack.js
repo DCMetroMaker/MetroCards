@@ -155,23 +155,19 @@ function buildCardStack() {
 
 // Reveal the next card from the stack.
 
+
 function revealNextCard() {
     if (!packStarted || packComplete || revealedCount >= CARDS_PER_PACK) {
         return;
     }
 
     const card = currentPack[revealedCount];
-    const stackCards = cardStack.querySelectorAll(".stacked-card");
-    const topCard = stackCards[0];
 
-    if (topCard) {
-        topCard.classList.add("card-leaving");
+    // Hide the stack and pack completely while showing the pulled card.
+    cardStack.hidden = true;
+    packImage.hidden = true;
 
-        window.setTimeout(() => {
-            topCard.remove();
-        }, 180);
-    }
-
+    // Display only the current card.
     currentCard.replaceChildren(createCardElement(card, "large-card"));
     currentCard.hidden = false;
 
@@ -191,15 +187,20 @@ function revealNextCard() {
 }
 
 
+
 // Show the completed pack and add its cards to the collection.
+
 function finishPack() {
     packStarted = false;
     packComplete = true;
 
+    // Hide all pack-opening elements.
+    packImage.hidden = true;
     cardStack.hidden = true;
     currentCard.hidden = true;
     currentCard.replaceChildren();
 
+    // Show the four cards together.
     revealedCards.replaceChildren();
 
     currentPack.forEach((card) => {
@@ -209,7 +210,9 @@ function finishPack() {
     collection.push(...currentPack);
     renderCollection();
 
-    packInstructions.textContent = "Pack complete! Here's what you pulled.";
+    packInstructions.textContent =
+        "Pack complete! Here's what you pulled.";
+
     packStatus.textContent = "All four cards revealed!";
 
     packButton.hidden = true;
