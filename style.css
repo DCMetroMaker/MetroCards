@@ -211,12 +211,12 @@ button:focus-visible {
 
 .card {
     min-width: 0;
-    padding: 9px;
+    padding: 0;
     overflow: hidden;
     border: 2px solid var(--border);
-    border-radius: 7px;
-    background: #fff9ed;
-    box-shadow: 0 3px 7px rgb(63 41 30 / 12%);
+    border-radius: 5px;
+    background: transparent;
+    box-shadow: none;
 }
 
 .card img {
@@ -224,7 +224,7 @@ button:focus-visible {
     width: 100%;
     aspect-ratio: 2 / 3;
     object-fit: contain;
-    border-radius: 4px;
+    border-radius: 3px;
     pointer-events: none;
 }
 
@@ -233,67 +233,40 @@ button:focus-visible {
     background: #e6d7bd;
 }
 
-.card-rarity {
-    margin: 10px 0 2px;
-    font-size: 0.85rem;
-    font-weight: bold;
-}
-
-/* Larger card during reveal */
+/* Revealed card: artwork only, no extra text or padding */
 
 .large-card {
-    padding: 8px;
+    padding: 0;
+    border-width: 2px;
+    cursor: pointer;
 }
 
 .large-card img {
     width: 100%;
 }
 
-.large-card .card-rarity {
-    font-size: 1rem;
-}
-
-/* Rarity colors */
+/* Rarity-colored borders */
 
 .rarity-legendary {
     border-color: #c99a25;
-}
-
-.rarity-legendary .card-rarity {
-    color: #946900;
 }
 
 .rarity-epic {
     border-color: #9862b8;
 }
 
-.rarity-epic .card-rarity {
-    color: #7d429f;
-}
-
 .rarity-rare {
     border-color: #5784b8;
-}
-
-.rarity-rare .card-rarity {
-    color: #35669d;
 }
 
 .rarity-uncommon {
     border-color: #64946b;
 }
 
-.rarity-uncommon .card-rarity {
-    color: #397245;
-}
-
 .rarity-common {
     border-color: #b6a995;
 }
 
-.rarity-common .card-rarity {
-    color: #776b5c;
-}
 
 /* Collection */
 
