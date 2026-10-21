@@ -6,9 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#593b2b">
     <title>MetroCards</title>
-    <link rel="stylesheet" href="style.css">
 
-    <!-- Load the card database before the pack logic -->
+    <link rel="stylesheet" href="style.css">
     <script src="cards.js" defer></script>
     <script src="pack.js" defer></script>
 </head>
@@ -24,12 +23,23 @@
                 Ready to see what you pull?
             </p>
 
+            <!-- Pack image / stacked cards / revealed card -->
             <div class="pack-display" id="pack-display">
                 <img
                     id="pack-image"
-                    src="pack.png"
-                    alt="MetroCards booster pack"
+                    src="cards/pack.png"
+                    alt="MetroCards pack"
                 >
+
+                <div
+                    id="card-stack"
+                    class="card-stack"
+                    role="group"
+                    aria-label="Cards in your pack"
+                    hidden
+                ></div>
+
+                <div id="current-card" class="current-card" hidden></div>
             </div>
 
             <button id="pack-button" type="button">
@@ -41,7 +51,7 @@
             <div
                 id="revealed-cards"
                 class="card-grid revealed-grid"
-                aria-label="Cards in the current pack"
+                aria-label="Your four cards"
             ></div>
 
             <button
@@ -57,7 +67,7 @@
         <section class="collection-section">
             <h2>Your Collection</h2>
             <p class="subtitle">
-                Cards you have collected will appear here.
+                Every card you pull will be saved here for this session.
             </p>
 
             <p id="collection-count" class="collection-count">
@@ -69,7 +79,7 @@
                 class="card-grid collection-grid"
                 aria-label="Your card collection"
             >
-                <p id="empty-collection" class="empty-message">
+                <p class="empty-message">
                     Your collection is empty. Open a pack to get started!
                 </p>
             </div>
