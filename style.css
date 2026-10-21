@@ -1,7 +1,7 @@
 
-/* ========================================
-   MetroCards - Main Stylesheet
-   ======================================== */
+/* =========================================
+   MetroCards - Complete Stylesheet
+   ========================================= */
 
 :root {
     --brown: #593b2b;
@@ -11,6 +11,10 @@
     --text: #38271e;
     --border: #c6ae88;
 }
+
+/* =========================================
+   Base Styles
+   ========================================= */
 
 * {
     box-sizing: border-box;
@@ -28,15 +32,19 @@ body {
     display: none !important;
 }
 
-/* ========================================
+img {
+    max-width: 100%;
+}
+
+/* =========================================
    Header
-   ======================================== */
+   ========================================= */
 
 .site-header {
     padding: 24px 16px;
-    text-align: center;
     background: var(--brown);
     color: var(--tan-light);
+    text-align: center;
 }
 
 .site-header h1 {
@@ -45,9 +53,9 @@ body {
     letter-spacing: 1px;
 }
 
-/* ========================================
+/* =========================================
    Main Layout
-   ======================================== */
+   ========================================= */
 
 .container {
     width: min(1100px, 100%);
@@ -73,9 +81,9 @@ h2 {
     line-height: 1.5;
 }
 
-/* ========================================
+/* =========================================
    Pack Display
-   ======================================== */
+   ========================================= */
 
 .pack-display {
     display: flex;
@@ -85,6 +93,8 @@ h2 {
     margin: 24px auto 18px;
     perspective: 1000px;
 }
+
+/* Booster pack image */
 
 #pack-image {
     display: block;
@@ -97,9 +107,9 @@ h2 {
     display: none;
 }
 
-/* ========================================
+/* =========================================
    Buttons
-   ======================================== */
+   ========================================= */
 
 button {
     padding: 13px 24px;
@@ -118,6 +128,10 @@ button {
 button:hover {
     background: var(--brown-dark);
     transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
 }
 
 button:focus-visible {
@@ -140,9 +154,9 @@ button[hidden] {
     font-size: 0.95rem;
 }
 
-/* ========================================
+/* =========================================
    Card Base
-   ======================================== */
+   ========================================= */
 
 .card {
     position: relative;
@@ -160,6 +174,8 @@ button[hidden] {
         box-shadow 0.25s ease,
         transform 0.25s ease;
 }
+
+/* Artwork fills the card frame */
 
 .card img {
     position: relative;
@@ -180,18 +196,18 @@ button[hidden] {
     object-fit: contain;
 }
 
-/* ========================================
-   Rarity Colors and Glow Effects
-   ======================================== */
+/* =========================================
+   Rarity Borders and Glow Effects
+   ========================================= */
 
-/* Common - neutral border, no glow */
+/* Common: plain border */
 
 .rarity-common {
     --rarity-color: #b6a995;
     box-shadow: none;
 }
 
-/* Uncommon - subtle green glow */
+/* Uncommon: subtle green glow */
 
 .rarity-uncommon {
     --rarity-color: #64946b;
@@ -199,7 +215,7 @@ button[hidden] {
         0 0 4px 1px rgb(100 148 107 / 35%);
 }
 
-/* Rare - medium blue glow */
+/* Rare: medium blue glow */
 
 .rarity-rare {
     --rarity-color: #5784b8;
@@ -208,7 +224,7 @@ button[hidden] {
         0 0 12px 3px rgb(87 132 184 / 22%);
 }
 
-/* Epic - strong purple glow */
+/* Epic: strong purple glow */
 
 .rarity-epic {
     --rarity-color: #9862b8;
@@ -218,7 +234,7 @@ button[hidden] {
         0 0 28px 7px rgb(152 98 184 / 12%);
 }
 
-/* Legendary - bright golden glow */
+/* Legendary: bright gold glow */
 
 .rarity-legendary {
     --rarity-color: #e5ad36;
@@ -229,9 +245,9 @@ button[hidden] {
         0 0 48px 16px rgb(229 173 54 / 10%);
 }
 
-/* ========================================
-   Card Stack
-   ======================================== */
+/* =========================================
+   Stack of Four Cards
+   ========================================= */
 
 .card-stack {
     position: relative;
@@ -265,15 +281,17 @@ button[hidden] {
         rotate(var(--card-rotation));
 }
 
+/* Optional exit animation */
+
 .stacked-card.card-leaving {
     transform: translate(100px, -90px) rotate(18deg);
     opacity: 0;
     pointer-events: none;
 }
 
-/* ========================================
-   Single Revealed Card
-   ======================================== */
+/* =========================================
+   Individual Revealed Card
+   ========================================= */
 
 .current-card {
     width: min(250px, 70vw);
@@ -288,6 +306,8 @@ button[hidden] {
     height: 100%;
 }
 
+/* No padding or rarity text around artwork */
+
 .large-card {
     padding: 0;
     border-width: 2px;
@@ -301,7 +321,7 @@ button[hidden] {
     object-fit: cover;
 }
 
-/* Card reveal animation */
+/* Reveal animation */
 
 @keyframes card-reveal {
     from {
@@ -315,9 +335,9 @@ button[hidden] {
     }
 }
 
-/* ========================================
+/* =========================================
    Card Grids
-   ======================================== */
+   ========================================= */
 
 .card-grid {
     display: grid;
@@ -331,11 +351,15 @@ button[hidden] {
     text-align: center;
 }
 
+/* Final four cards from a pack */
+
 .revealed-grid {
     max-width: 850px;
     margin-right: auto;
     margin-left: auto;
 }
+
+/* Collection background */
 
 .collection-grid {
     padding: 24px;
@@ -344,12 +368,14 @@ button[hidden] {
     background: var(--tan-light);
 }
 
-/* Collection count and empty state */
+/* Collection count */
 
 .collection-count {
     margin: 12px 0;
     font-weight: bold;
 }
+
+/* Empty collection message */
 
 .empty-message {
     grid-column: 1 / -1;
@@ -358,9 +384,9 @@ button[hidden] {
     line-height: 1.5;
 }
 
-/* ========================================
+/* =========================================
    Footer
-   ======================================== */
+   ========================================= */
 
 .site-footer {
     padding: 20px;
@@ -370,9 +396,9 @@ button[hidden] {
     font-size: 0.9rem;
 }
 
-/* ========================================
+/* =========================================
    Mobile Layout
-   ======================================== */
+   ========================================= */
 
 @media (max-width: 500px) {
     .container {
@@ -408,9 +434,9 @@ button[hidden] {
     }
 }
 
-/* ========================================
+/* =========================================
    Reduced Motion Accessibility
-   ======================================== */
+   ========================================= */
 
 @media (prefers-reduced-motion: reduce) {
     *,
