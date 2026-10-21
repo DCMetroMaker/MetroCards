@@ -107,23 +107,26 @@ function startPack() {
     packStarted = true;
     packComplete = false;
 
-    packImage.hidden = true;
+    // Show the unopened pack only.
+    packImage.hidden = false;
+    cardStack.hidden = true;
     currentCard.hidden = true;
+
+    cardStack.replaceChildren();
     currentCard.replaceChildren();
     revealedCards.replaceChildren();
 
-    buildCardStack();
-
-    cardStack.hidden = false;
     packButton.textContent = "Open Pack";
     packButton.hidden = false;
     anotherPackButton.hidden = true;
 
     packInstructions.textContent =
-        "Your pack is ready! Click the top card to reveal it.";
+        "Ready to see what you pull?";
 
-    packStatus.textContent =
-        `0 of ${CARDS_PER_PACK} cards revealed`;
+    packStatus.textContent = "";
+
+    // Prevent stale cards from appearing beside the pack.
+    buildCardStack();
 }
 
 // Build a layered stack from the four cards in this pack.
@@ -157,32 +160,63 @@ function buildCardStack() {
 
 
 function revealNextCard() {
-    if (!packStarted || packComplete || revealedCount >= CARDS_PER_PACK) {
+    if (!packStarted || packComplete) {
         return;
     }
 
-    const card = currentPack[revealedCount];
+    // First click: replace the pack with the card stack.
+    if (revealedCount === 0 && !packImage.hidden) {
+        packImage.hidden = true;
+        cardStack.hidden = false;
 
-    // Hide the stack and pack completely while showing the pulled card.
-    cardStack.hidden = true;
-    packImage.hidden = true;
+        packInstructions.textContent =
+            "Click the stack to reveal your first card.";
 
-    // Display only the current card.
-    currentCard.replaceChildren(createCardElement(card, "large-card"));
-    currentCard.hidden = false;
+        return;
+    }
 
-    revealedCount++;
+    // Ignore clicks if the stack is still being shown.
+    if (revealedCount === 0 && !cardStack.hidden) {
+        const card = currentPack[0];
 
-    packInstructions.textContent =
-        revealedCount < CARDS_PER_PACK
-            ? "Click the card to reveal the next one."
-            : "That's your last card!";
+        cardStack.hidden = true;
+        currentCard.replaceChildren(
+            createCardElement(card, "large-card")
+        );
+        currentCard.hidden = false;
 
-    packStatus.textContent =
-        `${revealedCount} of ${CARDS_PER_PACK} cards revealed`;
+        revealedCount = 1;
 
-    if (revealedCount === CARDS_PER_PACK) {
-        finishPack();
+        packInstructions.textContent =
+            "Click the card to reveal the next one.";
+
+        packStatus.textContent =
+            `${revealedCount} of ${CARDS_PER_PACK} cards revealed`;
+
+        return;
+    }
+
+    // Clicking a revealed card advances to the next card.
+    if (!currentCard.hidden) {
+        if (revealedCount < CARDS_PER_PACK) {
+            const card = currentPack[revealedCount];
+
+            currentCard.replaceChildren(
+                createCardElement(card, "large-card")
+            );
+
+            revealedCount++;
+
+            packInstructions.textContent =
+                revealedCount < CARDS_PER_PACK
+                    ? "Click the card to reveal the next one."
+                    : "Click the last card to see your pack results.";
+
+            packStatus.textContent =
+                `${revealedCount} of ${CARDS_PER_PACK} cards revealed`;
+        } else {
+            finishPack();
+        }
     }
 }
 
@@ -194,13 +228,12 @@ function finishPack() {
     packStarted = false;
     packComplete = true;
 
-    // Hide all pack-opening elements.
     packImage.hidden = true;
     cardStack.hidden = true;
     currentCard.hidden = true;
-    currentCard.replaceChildren();
 
-    // Show the four cards together.
+    currentCard.replaceChildren();
+    cardStack.replaceChildren();
     revealedCards.replaceChildren();
 
     currentPack.forEach((card) => {
