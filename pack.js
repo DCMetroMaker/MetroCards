@@ -1,23 +1,23 @@
 const CARDS_PER_PACK = 4;
 
-// Each rarity is an independent final probability range.
-// The order matters: higher rarities are checked first.
 const RARITY_CHANCES = [
     { name: "Legendary", chance: 1 / 25, cards: () => legendaryCards },
-    { name: "Epic",      chance: 1 / 12, cards: () => epicCards },
-    { name: "Rare",      chance: 1 / 8,  cards: () => rareCards },
-    { name: "Uncommon",  chance: 1 / 3,  cards: () => uncommonCards }
+    { name: "Epic", chance: 1 / 12, cards: () => epicCards },
+    { name: "Rare", chance: 1 / 8, cards: () => rareCards },
+    { name: "Uncommon", chance: 1 / 3, cards: () => uncommonCards }
 ];
 
-// Collection persists while the page is open.
+// Current session collection.
 const collection = [];
 
 let currentPack = [];
 let revealedCount = 0;
-let packInProgress = false;
+let packStarted = false;
+let packComplete = false;
 
-// HTML elements
 const packImage = document.getElementById("pack-image");
+const cardStack = document.getElementById("card-stack");
+const currentCard = document.getElementById("current-card");
 const packButton = document.getElementById("pack-button");
 const anotherPackButton = document.getElementById("another-pack-button");
 const packInstructions = document.getElementById("pack-instructions");
@@ -26,7 +26,7 @@ const revealedCards = document.getElementById("revealed-cards");
 const collectionElement = document.getElementById("collection");
 const collectionCount = document.getElementById("collection-count");
 
-// Pick a random card ID from an array.
+// Pick a random card ID from a rarity array.
 function pickRandomCard(cardArray) {
     if (!Array.isArray(cardArray) || cardArray.length === 0) {
         return null;
@@ -35,7 +35,8 @@ function pickRandomCard(cardArray) {
     return cardArray[Math.floor(Math.random() * cardArray.length)];
 }
 
-// Roll a rarity and return a card object.
+// Draw a card using the configured rarity odds.
+// Higher rarities are checked first; Common is the fallback.
 function drawCard() {
     const roll = Math.random();
     let cumulativeChance = 0;
@@ -46,62 +47,50 @@ function drawCard() {
         if (roll < cumulativeChance) {
             const cardId = pickRandomCard(rarity.cards());
 
-            // If this rarity has no cards, fall back to Common.
             if (cardId !== null) {
-                return {
-                    id: cardId,
-                    rarity: rarity.name
-                };
+                return { id: cardId, rarity: rarity.name };
             }
 
             break;
         }
     }
 
-    // Common is the default rarity.
     const commonId = pickRandomCard(commonCards);
 
     if (commonId === null) {
         throw new Error(
-            "No common cards are available. Check your cards.js file."
+            "No common cards are available. Check cards.js."
         );
     }
 
-    return {
-        id: commonId,
-        rarity: "Common"
-    };
+    return { id: commonId, rarity: "Common" };
 }
 
-// Create an image element for a card.
-function createCardElement(card) {
-    const wrapper = document.createElement("div");
-    wrapper.className = `card rarity-${card.rarity.toLowerCase()}`;
+// Create a card element. The card ID is never shown as text.
+function createCardElement(card, extraClass = "") {
+    const wrapper = document.createElement("article");
+    wrapper.className =
+        `card rarity-${card.rarity.toLowerCase()} ${extraClass}`.trim();
 
     const image = document.createElement("img");
     image.src = `cards/${card.id}.png`;
-    image.alt = `${card.rarity} card ${card.id}`;
-    image.loading = "lazy";
+    image.alt = `${card.rarity} trading card`;
+    image.draggable = false;
 
     image.onerror = () => {
-        image.alt = `Missing image: ${card.id}.png`;
+        image.alt = "Card image unavailable";
         image.classList.add("image-error");
     };
-
-    const name = document.createElement("p");
-    name.className = "card-name";
-    name.textContent = card.id;
 
     const rarity = document.createElement("p");
     rarity.className = "card-rarity";
     rarity.textContent = card.rarity;
 
-    wrapper.append(image, name, rarity);
-
+    wrapper.append(image, rarity);
     return wrapper;
 }
 
-// Start a new pack.
+// Start a new pack-opening sequence.
 function startPack() {
     try {
         currentPack = [];
@@ -112,78 +101,125 @@ function startPack() {
     } catch (error) {
         console.error(error);
         packStatus.textContent =
-            "Unable to open a pack. Please check your cards.js file.";
+            "Unable to open a pack. Please check cards.js.";
         return;
     }
 
     revealedCount = 0;
-    packInProgress = true;
+    packStarted = true;
+    packComplete = false;
 
-    // Show the unopened pack.
-    packImage.src = "pack.png";
-    packImage.alt = "An unopened MetroCards pack";
-    packImage.hidden = false;
-
+    packImage.hidden = true;
+    currentCard.hidden = true;
+    currentCard.replaceChildren();
     revealedCards.replaceChildren();
 
-    packInstructions.textContent =
-        "Your pack is ready. Click below to reveal the first card.";
+    buildCardStack();
 
-    packButton.textContent = "Reveal First Card";
+    cardStack.hidden = false;
+    packButton.textContent = "Reveal Next Card";
     packButton.hidden = false;
     anotherPackButton.hidden = true;
 
-    packStatus.textContent = `0 of ${CARDS_PER_PACK} cards revealed`;
+    packInstructions.textContent =
+        "Your pack is ready! Click the top card to reveal it.";
+
+    packStatus.textContent =
+        `0 of ${CARDS_PER_PACK} cards revealed`;
 }
 
-// Reveal one card at a time.
-function revealNextCard() {
-    if (!packInProgress) {
-        startPack();
-        return;
-    }
+// Build a layered stack from the four cards in this pack.
+function buildCardStack() {
+    cardStack.replaceChildren();
 
-    if (revealedCount >= CARDS_PER_PACK) {
+    currentPack.forEach((card, index) => {
+        const cardElement = createCardElement(card, "stacked-card");
+
+        // The first card is on top; the others peek out underneath.
+        const rotation = (index % 2 === 0 ? -1 : 1) * (index + 1) * 1.8;
+        const offsetX = index * 3;
+        const offsetY = index * 5;
+
+        cardElement.style.setProperty("--card-rotation", `${rotation}deg`);
+        cardElement.style.setProperty("--card-x", `${offsetX}px`);
+        cardElement.style.setProperty("--card-y", `${offsetY}px`);
+        cardElement.style.setProperty("--stack-index", CARDS_PER_PACK - index);
+
+        cardElement.setAttribute("aria-hidden", "true");
+        cardStack.appendChild(cardElement);
+    });
+
+    cardStack.setAttribute(
+        "aria-label",
+        `Four cards in a stack. ${CARDS_PER_PACK} cards ready to reveal.`
+    );
+}
+
+// Reveal the next card from the stack.
+function revealNextCard() {
+    if (!packStarted || packComplete || revealedCount >= CARDS_PER_PACK) {
         return;
     }
 
     const card = currentPack[revealedCount];
+    const stackCards = cardStack.querySelectorAll(".stacked-card");
+    const topCard = stackCards[0];
 
-    revealedCards.appendChild(createCardElement(card));
+    if (topCard) {
+        topCard.classList.add("card-leaving");
+
+        // Let the short exit animation finish before updating the display.
+        window.setTimeout(() => {
+            topCard.remove();
+        }, 180);
+    }
+
+    currentCard.replaceChildren(createCardElement(card, "large-card"));
+    currentCard.hidden = false;
+
     revealedCount++;
 
-    packImage.hidden = true;
+    packInstructions.textContent =
+        revealedCount < CARDS_PER_PACK
+            ? "Nice pull! Click the card or button to reveal the next one."
+            : "That's your last card!";
 
     packStatus.textContent =
         `${revealedCount} of ${CARDS_PER_PACK} cards revealed`;
 
-    if (revealedCount < CARDS_PER_PACK) {
-        packInstructions.textContent =
-            "What's next? Reveal another card!";
-
-        packButton.textContent = "Reveal Next Card";
-    } else {
+    if (revealedCount === CARDS_PER_PACK) {
         finishPack();
+    } else {
+        packButton.textContent = "Reveal Next Card";
     }
 }
 
-// Finish the pack and add all four cards to the collection.
+// Show the completed pack and add its cards to the collection.
 function finishPack() {
-    packInProgress = false;
+    packStarted = false;
+    packComplete = true;
+
+    cardStack.hidden = true;
+    currentCard.hidden = true;
+    currentCard.replaceChildren();
+
+    revealedCards.replaceChildren();
+
+    currentPack.forEach((card) => {
+        revealedCards.appendChild(createCardElement(card));
+    });
 
     collection.push(...currentPack);
+    renderCollection();
 
     packInstructions.textContent = "Pack complete! Here's what you pulled.";
+    packStatus.textContent = "All four cards revealed!";
 
     packButton.hidden = true;
     anotherPackButton.hidden = false;
-
-    packStatus.textContent = "All four cards revealed!";
-
-    renderCollection();
 }
 
-// Update the collection display.
+// Render all cards collected this session.
 function renderCollection() {
     collectionElement.replaceChildren();
 
@@ -192,7 +228,6 @@ function renderCollection() {
         emptyMessage.className = "empty-message";
         emptyMessage.textContent =
             "Your collection is empty. Open a pack to get started!";
-
         collectionElement.appendChild(emptyMessage);
     } else {
         collection.forEach((card) => {
@@ -204,19 +239,34 @@ function renderCollection() {
         `${collection.length} ${collection.length === 1 ? "card" : "cards"} collected`;
 }
 
-// Event listeners.
+// Clicking the stack or the current card advances the reveal.
+cardStack.addEventListener("click", revealNextCard);
+currentCard.addEventListener("click", revealNextCard);
+
+// Keyboard accessibility for the card stack.
+cardStack.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        revealNextCard();
+    }
+});
+
+// The button opens the pack initially and advances reveals afterwards.
 packButton.addEventListener("click", () => {
-    if (!packInProgress && currentPack.length === 0) {
+    if (!packStarted && !packComplete) {
         startPack();
-    } else {
+    } else if (packStarted) {
         revealNextCard();
     }
 });
 
 anotherPackButton.addEventListener("click", startPack);
 
-// Initial page state.
+// Initial state.
+packImage.src = "cards/pack.png";
 packImage.hidden = false;
+cardStack.hidden = true;
+currentCard.hidden = true;
 packButton.textContent = "Open Pack";
 packStatus.textContent = "";
 renderCollection();
